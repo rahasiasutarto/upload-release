@@ -28785,14 +28785,14 @@ function wrappy (fn, cb) {
 /***/ 5858:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(5438);
 const core = __nccwpck_require__(2186);
-const { GitHub } = __nccwpck_require__(5438);
 const fs = __nccwpck_require__(7147);
 
 async function run() {
   try {
     // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-    const github = new GitHub(process.env.GITHUB_TOKEN);
+    const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const uploadUrl = core.getInput('upload_url', { required: true });
@@ -28806,14 +28806,24 @@ async function run() {
     // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
     const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
 
+    const context = github.context;
+
     // Upload a release asset
     // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
     // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-    const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+    // const uploadAssetResponse = await github.repos.uploadReleaseAsset({
+    //   url: uploadUrl,
+    //   headers,
+    //   name: assetName,
+    //   file: fs.readFileSync(assetPath)
+    // });
+    const uploadAssetResponse = await octokit.request({
+      method: 'POST',
       url: uploadUrl,
       headers,
       name: assetName,
-      file: fs.readFileSync(assetPath)
+      label: assetName,
+      data: fs.readFileSync(assetPath)
     });
 
     // Get the browser_download_url for the uploaded release asset from the response

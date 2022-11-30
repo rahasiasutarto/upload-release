@@ -31320,14 +31320,6 @@ async function run() {
     const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
 
     // Upload a release asset
-    // API Documentation: https://developer.github.com/v3/repos/releases/#upload-a-release-asset
-    // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset
-    // const uploadAssetResponse = await github.repos.uploadReleaseAsset({
-    //   url: uploadUrl,
-    //   headers,
-    //   name: assetName,
-    //   file: fs.readFileSync(assetPath)
-    // });
     const uploadAssetResponse = await octokit.request({
       method: 'POST',
       url: uploadUrl,

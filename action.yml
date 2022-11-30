@@ -1,5 +1,5 @@
-name: 'Upload a Release Asset'
-description: 'Upload a release asset to an existing release in your repository'
+name: 'Upload a Release Asset - V2'
+description: 'Upload a release asset to an existing release in your repository, updated for Node 16.'
 author: 'GitHub'
 inputs:
   upload_url:

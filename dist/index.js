@@ -2408,6 +2408,41 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
+/***/ 20:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var authToken = __nccwpck_require__(334);
+
+const createActionAuth = function createActionAuth() {
+  if (!process.env.GITHUB_ACTION) {
+    throw new Error("[@octokit/auth-action] `GITHUB_ACTION` environment variable is not set. @octokit/auth-action is meant to be used in GitHub Actions only.");
+  }
+
+  const definitions = [process.env.GITHUB_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.INPUT_TOKEN].filter(Boolean);
+
+  if (definitions.length === 0) {
+    throw new Error("[@octokit/auth-action] `GITHUB_TOKEN` variable is not set. It must be set on either `env:` or `with:`. See https://github.com/octokit/auth-action.js#createactionauth");
+  }
+
+  if (definitions.length > 1) {
+    throw new Error("[@octokit/auth-action] The token variable is specified more than once. Use either `with.token`, `with.GITHUB_TOKEN`, or `env.GITHUB_TOKEN`. See https://github.com/octokit/auth-action.js#createactionauth");
+  }
+
+  const token = definitions.pop();
+  return authToken.createTokenAuth(token);
+};
+
+exports.createActionAuth = createActionAuth;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ 334:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -9271,7 +9306,7 @@ function wrappy (fn, cb) {
 
 const core = __nccwpck_require__(2186);
 const { Octokit } = __nccwpck_require__(5375);
-const { createActionAuth } = __nccwpck_require__(7852);
+const { createActionAuth } = __nccwpck_require__(20);
 const fs = __nccwpck_require__(7147);
 
 async function run() {
@@ -9320,14 +9355,6 @@ async function run() {
 }
 
 module.exports = run;
-
-
-/***/ }),
-
-/***/ 7852:
-/***/ ((module) => {
-
-module.exports = eval("require")("@octokit/auth-action");
 
 
 /***/ }),

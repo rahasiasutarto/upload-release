@@ -11,13 +11,12 @@ async function run() {
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const url = core.getInput('upload_url', { required: true });
+    const repoOwner = core.getInput('repo_owner', { required: true });
+    const repoName = core.getInput('repo_name', { required: true });
     const releaseId = core.getInput('release_id', { required: true });
     const assetPath = core.getInput('asset_path', { required: true });
     const assetName = core.getInput('asset_name', { required: true });
     const assetContentType = core.getInput('asset_content_type', { required: true });
-
-    const repoName = core.getInput('repo_name', { required: true });
-    const [owner, repo] = repoName.split('/');
 
     // Determine content-length for header to upload asset
     const contentLength = filePath => fs.statSync(filePath).size;
@@ -28,8 +27,8 @@ async function run() {
     // Upload a release asset
     const uploadAssetResponse = await octokit.rest.repos.uploadReleaseAsset({
       headers,
-      owner,
-      repo,
+      owner: repoOwner,
+      repo: repoName,
       release_id: releaseId,
       name: assetName,
       label: assetName,

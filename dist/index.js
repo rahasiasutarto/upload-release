@@ -31326,7 +31326,10 @@ async function run() {
       headers,
       name: assetName,
       label: assetName,
-      data: fs.readFileSync(assetPath)
+      data: fs.readFileSync(assetPath),
+      request: {
+        timeout: 0
+      }
     });
 
     // Get the browser_download_url for the uploaded release asset from the response

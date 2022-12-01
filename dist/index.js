@@ -2408,41 +2408,6 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 20:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-var authToken = __nccwpck_require__(334);
-
-const createActionAuth = function createActionAuth() {
-  if (!process.env.GITHUB_ACTION) {
-    throw new Error("[@octokit/auth-action] `GITHUB_ACTION` environment variable is not set. @octokit/auth-action is meant to be used in GitHub Actions only.");
-  }
-
-  const definitions = [process.env.GITHUB_TOKEN, process.env.INPUT_GITHUB_TOKEN, process.env.INPUT_TOKEN].filter(Boolean);
-
-  if (definitions.length === 0) {
-    throw new Error("[@octokit/auth-action] `GITHUB_TOKEN` variable is not set. It must be set on either `env:` or `with:`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  if (definitions.length > 1) {
-    throw new Error("[@octokit/auth-action] The token variable is specified more than once. Use either `with.token`, `with.GITHUB_TOKEN`, or `env.GITHUB_TOKEN`. See https://github.com/octokit/auth-action.js#createactionauth");
-  }
-
-  const token = definitions.pop();
-  return authToken.createTokenAuth(token);
-};
-
-exports.createActionAuth = createActionAuth;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
 /***/ 334:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -9306,21 +9271,24 @@ function wrappy (fn, cb) {
 
 const core = __nccwpck_require__(2186);
 const { Octokit } = __nccwpck_require__(5375);
-const { createActionAuth } = __nccwpck_require__(20);
 const fs = __nccwpck_require__(7147);
 
 async function run() {
   try {
     // Get authenticated GitHub client (Ocktokit): https://github.com/actions/toolkit/tree/master/packages/github#usage
-    const auth = createActionAuth();
-
-    const octokit = new Octokit();
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN
+    });
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-    const uploadUrl = core.getInput('upload_url', { required: true });
+    const url = core.getInput('upload_url', { required: true });
+    const releaseId = core.getInput('release_id', { required: true });
     const assetPath = core.getInput('asset_path', { required: true });
     const assetName = core.getInput('asset_name', { required: true });
     const assetContentType = core.getInput('asset_content_type', { required: true });
+
+    const repoName = core.getInput('repo_name', { required: true });
+    const [owner, repo] = repoName.split('/');
 
     // Determine content-length for header to upload asset
     const contentLength = filePath => fs.statSync(filePath).size;
@@ -9329,17 +9297,15 @@ async function run() {
     const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
 
     // Upload a release asset
-    const uploadAssetResponse = await octokit.request({
-      method: 'POST',
-      url: uploadUrl,
+    const uploadAssetResponse = await octokit.rest.repos.uploadReleaseAsset({
       headers,
+      owner,
+      repo,
+      release_id: releaseId,
       name: assetName,
       label: assetName,
       data: fs.readFileSync(assetPath),
-      request: {
-        hook: auth.hook,
-        timeout: 0
-      }
+      origin: url
     });
 
     // Get the browser_download_url for the uploaded release asset from the response

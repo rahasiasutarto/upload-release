@@ -51,16 +51,24 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload zip
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
+        with:
+            name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}
+            path: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
+
+      - name: Upload release assets
         uses: dream-encode/upload-release-asset-node16@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./my-artifact.zip
-          asset_name: my-artifact.zip
+          repo_owner: ${{ github.event.repository.owner.login }}
+          repo_name: ${{ github.event.repository.name }}
+          release_id: ${{ steps.create_release.outputs.id }}
+          asset_path: ${{ github.event.repository.name }}-${{ github.ref }}.zip
+          asset_name: ${{ github.event.repository.name }}-${{ github.ref }}.zip
           asset_content_type: application/zip
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
 ```
 
 This will upload a release artifact to an existing release, outputting the `browser_download_url` for the asset which could be handled by a third party service, or by GitHub Actions for additional uses. For more information, see the GitHub Documentation for the [upload a release asset](https://developer.github.com/v3/repos/releases/#upload-a-release-asset) endpoint.

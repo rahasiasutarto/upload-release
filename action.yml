@@ -2,6 +2,8 @@ name: 'Upload a Release Asset - V2'
 description: 'Upload a release asset to an existing release in your repository, updated for Node 16.'
 author: 'GitHub'
 inputs:
+  token:
+    description: 'Access token'
   repo_owner:
     description: 'The owner of the repo'
     required: true

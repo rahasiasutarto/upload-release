@@ -51,12 +51,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-      - name: Upload zip
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
-        with:
-            name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}
-            path: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
-
       - name: Upload release assets
         uses: dream-encode/upload-release-asset-node16@v2
         env:
